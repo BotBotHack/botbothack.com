@@ -6,12 +6,12 @@ const I18N = {
   ru: {
     intro: 'Хочешь хороший хак, не так ли?',
     status: 'соединение: защищено',
-    meta: 'v0.1 · сборка alpha',
+    meta: 'v0.2 · сборка alpha',
   },
   en: {
     intro: "Want a good hack, don't you?",
     status: 'connection: secure',
-    meta: 'v0.1 · build alpha',
+    meta: 'v0.2 · build alpha',
   },
 };
 
