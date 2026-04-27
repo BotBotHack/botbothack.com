@@ -4,47 +4,30 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#050709">
-  <title>&gt;_ access</title>
+  <title>...</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Background layers -->
-  <div class="bg-grid" aria-hidden="true"></div>
+  <!-- Atmospheric layers -->
   <div class="bg-glow" aria-hidden="true"></div>
-  <div class="scanlines" aria-hidden="true"></div>
-  <div class="vignette" aria-hidden="true"></div>
+  <div class="bg-scan" aria-hidden="true"></div>
 
-  <!-- Top bar: logo + language switcher -->
-  <header class="topbar">
-    <div class="logo">
-      <span class="logo-bracket">[</span><span class="logo-text">root@hack</span><span class="logo-bracket">]</span><span class="logo-cursor">▮</span>
-    </div>
-    <nav class="lang-switch" aria-label="Language">
-      <button class="lang-btn" data-lang="ru" type="button">RU</button>
-      <span class="lang-sep">/</span>
-      <button class="lang-btn" data-lang="en" type="button">EN</button>
-    </nav>
-  </header>
-
-  <!-- Main stage: the prompt + answer area -->
+  <!-- The hero text -->
   <main class="stage">
-    <div class="prompt" aria-live="polite">
-      <span class="prompt-prefix">$</span><span class="prompt-text" id="promptText"></span><span class="prompt-cursor" id="promptCursor">▮</span>
-    </div>
-    <div class="answers" id="answers"></div>
+    <h1 class="prompt" aria-live="polite">
+      <span id="promptText"></span><span id="promptCursor" class="cursor"></span>
+    </h1>
   </main>
 
-  <!-- Bottom status bar -->
-  <footer class="bottombar">
-    <span class="status">
-      <span class="status-dot"></span>
-      <span id="statusText">connection: secure</span>
-    </span>
-    <span class="meta" id="metaText">v0.1 · build alpha</span>
-  </footer>
+  <!-- Minimal language switcher in corner -->
+  <nav class="lang-switch" aria-label="Language">
+    <button class="lang-btn" data-lang="ru" type="button">RU</button>
+    <span class="lang-sep">/</span>
+    <button class="lang-btn" data-lang="en" type="button">EN</button>
+  </nav>
 
   <script src="app.js"></script>
 </body>
