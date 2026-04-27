@@ -1,17 +1,13 @@
 /* =========================================================
-   1) i18n — dictionary + language auto-detect
-   To add a new step's text: just add a key to both `ru` and `en`.
+   1) i18n — texts in both languages, auto-detected on load.
+   To add new step text: add a key to BOTH `ru` and `en`.
 ========================================================= */
 const I18N = {
   ru: {
     intro: 'Хочешь хороший хак, не так ли?',
-    status: 'соединение: защищено',
-    meta: 'v0.1 · сборка alpha',
   },
   en: {
     intro: "Want a good hack, don't you?",
-    status: 'connection: secure',
-    meta: 'v0.1 · build alpha',
   },
 };
 
@@ -27,13 +23,12 @@ const t = (key) => I18N[currentLang][key] ?? I18N.en[key] ?? key;
 
 
 /* =========================================================
-   2) Typewriter — types and erases text with cancellation.
-   Each await checks a token so we can stop mid-animation
-   when the user toggles language.
+   2) Typewriter — types and erases with cancellation tokens,
+   so language toggle can interrupt mid-animation cleanly.
 ========================================================= */
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
-async function typeText(el, text, token, { charDelay = 55, jitter = 35 } = {}) {
+async function typeText(el, text, token, { charDelay = 75, jitter = 45 } = {}) {
   el.textContent = '';
   for (const ch of text) {
     if (token.cancelled) return false;
@@ -43,7 +38,7 @@ async function typeText(el, text, token, { charDelay = 55, jitter = 35 } = {}) {
   return true;
 }
 
-async function eraseText(el, token, { charDelay = 22 } = {}) {
+async function eraseText(el, token, { charDelay = 28 } = {}) {
   while (el.textContent.length > 0) {
     if (token.cancelled) return false;
     el.textContent = el.textContent.slice(0, -1);
@@ -56,14 +51,15 @@ async function eraseText(el, token, { charDelay = 22 } = {}) {
 /* =========================================================
    3) Flow engine — declarative steps.
    Step types:
-     - 'message'  : type text → hold → erase → next
-     - 'question' : type text → show answer buttons → wait for click → next
-   Add new steps to the `flow` array; reference ids via `next`.
+     - 'message'  : type → hold → erase → next
+     - 'question' : type → show answer buttons → wait for click → next
+   Add steps to the `flow` array; `next` references step `id`s.
 ========================================================= */
 const flow = [
   { id: 'intro', type: 'message', key: 'intro', hold: 3000 },
 
-  // Examples for later — uncomment and fill in I18N keys to extend:
+  // Future example — when you're ready to add the question/answer step,
+  // also add corresponding keys to I18N (q1_text, q1_yes, q1_no, ...):
   //
   // {
   //   id: 'q1',
@@ -79,41 +75,24 @@ const flow = [
 let activeToken = null;
 
 async function runStep(step, token) {
-  const promptEl  = document.getElementById('promptText');
-  const cursorEl  = document.getElementById('promptCursor');
-  const answersEl = document.getElementById('answers');
+  const promptEl = document.getElementById('promptText');
+  const cursorEl = document.getElementById('promptCursor');
 
-  answersEl.innerHTML = '';
   cursorEl.classList.remove('hidden');
 
   const typed = await typeText(promptEl, t(step.key), token);
   if (!typed || token.cancelled) return null;
 
   if (step.type === 'message') {
-    await sleep(step.hold ?? 2500);
+    await sleep(step.hold ?? 3000);
     if (token.cancelled) return null;
     await eraseText(promptEl, token);
     if (token.cancelled) return null;
     return { next: step.next ?? null };
   }
 
-  if (step.type === 'question') {
-    return new Promise((resolve) => {
-      step.answers.forEach((ans, i) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'answer-btn';
-        btn.style.animationDelay = `${i * 90}ms`;
-        btn.textContent = t(ans.key);
-        btn.addEventListener('click', () => {
-          if (token.cancelled) return;
-          resolve({ next: ans.next ?? null });
-        });
-        answersEl.appendChild(btn);
-      });
-    });
-  }
-
+  // 'question' branch — to be wired up when answers UI is added.
+  // Returns when an answer is clicked.
   return null;
 }
 
@@ -139,24 +118,19 @@ function startFlow() {
   const token = { cancelled: false };
   activeToken = token;
 
-  // Reset UI before starting fresh
   document.getElementById('promptText').textContent = '';
-  document.getElementById('answers').innerHTML = '';
-
   runFlow(token);
 }
 
 
 /* =========================================================
-   Language switch
+   Language switch UI
 ========================================================= */
 function applyLangUI() {
   document.documentElement.lang = currentLang;
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.lang === currentLang);
   });
-  document.getElementById('statusText').textContent = t('status');
-  document.getElementById('metaText').textContent = t('meta');
 }
 
 document.querySelectorAll('.lang-btn').forEach(btn => {
