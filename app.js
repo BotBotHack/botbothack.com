@@ -63,7 +63,7 @@ const CARDS = [
     name: 'RatingHack',
     tag: 'Paid',
     tagClass: 'card-tag-paid',
-    image: 'sf2.png',
+    image: 'sf2_paid.png',
     overlay: 'venok.png',
     features: [
       { key: 'all_from_free' },
