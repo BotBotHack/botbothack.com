@@ -1,17 +1,21 @@
 /* =========================================================
-   1) i18n — dictionary + language auto-detect
-   To add a new step's text: just add a key to both `ru` and `en`.
+   1) i18n — texts in both languages, auto-detected on load.
+   To add new step text: add a key to BOTH `ru` and `en`.
 ========================================================= */
 const I18N = {
   ru: {
-    intro: 'Хочешь хороший хак, не так ли?',
-    status: 'соединение: защищено',
-    meta: 'v0.2 · сборка alpha',
+    intro:         'Хочешь хороший хак, не так ли?',
+    choose:        'Сделай выбор',
+    all_from_free: 'Всё из GoogleBypass',
+    status:        'соединение: защищено',
+    meta:          'v0.1 · сборка alpha',
   },
   en: {
-    intro: "Want a good hack, don't you?",
-    status: 'connection: secure',
-    meta: 'v0.2 · build alpha',
+    intro:         "Want a good hack, don't you?",
+    choose:        'Make your choice',
+    all_from_free: 'All from GoogleBypass',
+    status:        'connection: secure',
+    meta:          'v0.1 · build alpha',
   },
 };
 
@@ -27,9 +31,46 @@ const t = (key) => I18N[currentLang][key] ?? I18N.en[key] ?? key;
 
 
 /* =========================================================
-   2) Typewriter — types and erases text with cancellation.
-   Each await checks a token so we can stop mid-animation
-   when the user toggles language.
+   2) Cards — declarative description of the choice cards.
+   Each feature is either { static: '...' } (universal English term,
+   not translated) or { key: '...' } (looked up in I18N).
+========================================================= */
+const CARDS = [
+  {
+    id: 'free',
+    name: 'GoogleBypass',
+    tag: 'Free',
+    tagClass: 'card-tag-free',
+    image: 'sf2.png',
+    features: [
+      { static: 'Google Bypass' },
+      { static: 'Instant Thruster 60X' },
+      { static: '3X Perks' },
+      { static: '4Th Tier' },
+      { static: 'No Ads' },
+    ],
+  },
+  {
+    id: 'paid',
+    name: 'RatingHack',
+    tag: 'Paid',
+    tagClass: 'card-tag-paid',
+    image: 'sf2.png',
+    overlay: 'venok.png',
+    features: [
+      { key: 'all_from_free' },
+      { static: 'Set Damage' },
+      { static: 'Skip Finishing' },
+      { static: 'Clan Raid System' },
+      { static: 'Full Auto mode' },
+    ],
+  },
+];
+
+
+/* =========================================================
+   3) Typewriter — types and erases with cancellation tokens,
+   so language toggle can interrupt mid-animation cleanly.
 ========================================================= */
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
@@ -54,37 +95,87 @@ async function eraseText(el, token, { charDelay = 22 } = {}) {
 
 
 /* =========================================================
-   3) Flow engine — declarative steps.
+   4) Card rendering
+========================================================= */
+function renderCards(container) {
+  container.innerHTML = '';
+  CARDS.forEach((card) => {
+    const el = document.createElement('article');
+    el.className = 'card';
+    el.dataset.cardId = card.id;
+
+    // Title — name | tag (with colored separator and tag class).
+    // Spaces between spans are required so the browser can wrap
+    // long titles instead of overflowing the card.
+    const title = document.createElement('h3');
+    title.className = 'card-title';
+    title.innerHTML =
+      `<span class="card-title-name">${card.name}</span> ` +
+      `<span class="card-title-sep">|</span> ` +
+      `<span class="${card.tagClass}">${card.tag}</span>`;
+    el.appendChild(title);
+
+    // Image (with optional overlay laid on top)
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'card-image';
+    const baseImg = document.createElement('img');
+    baseImg.className = 'card-image-base';
+    baseImg.src = card.image;
+    baseImg.alt = '';
+    imgWrap.appendChild(baseImg);
+    if (card.overlay) {
+      const overlayImg = document.createElement('img');
+      overlayImg.className = 'card-image-overlay';
+      overlayImg.src = card.overlay;
+      overlayImg.alt = '';
+      imgWrap.appendChild(overlayImg);
+    }
+    el.appendChild(imgWrap);
+
+    // Features list
+    const ul = document.createElement('ul');
+    ul.className = 'card-features';
+    card.features.forEach((f) => {
+      const li = document.createElement('li');
+      li.textContent = f.key ? t(f.key) : f.static;
+      ul.appendChild(li);
+    });
+    el.appendChild(ul);
+
+    container.appendChild(el);
+  });
+}
+
+
+/* =========================================================
+   5) Flow engine — declarative steps.
    Step types:
-     - 'message'  : type text → hold → erase → next
-     - 'question' : type text → show answer buttons → wait for click → next
-   Add new steps to the `flow` array; reference ids via `next`.
+     - 'message' : type → hold → erase → next
+     - 'choice'  : type → keep on screen → render cards → freeze
 ========================================================= */
 const flow = [
-  { id: 'intro', type: 'message', key: 'intro', hold: 3000 },
-
-  // Examples for later — uncomment and fill in I18N keys to extend:
-  //
-  // {
-  //   id: 'q1',
-  //   type: 'question',
-  //   key: 'q1_text',
-  //   answers: [
-  //     { key: 'q1_yes', next: 'q2' },
-  //     { key: 'q1_no',  next: 'end' },
-  //   ],
-  // },
+  { id: 'intro',  type: 'message', key: 'intro',  hold: 3000 },
+  { id: 'choose', type: 'choice',  key: 'choose' },
 ];
 
 let activeToken = null;
+let currentStepIndex = 0;
 
 async function runStep(step, token) {
   const promptEl  = document.getElementById('promptText');
   const cursorEl  = document.getElementById('promptCursor');
   const answersEl = document.getElementById('answers');
+  const cardsEl   = document.getElementById('cards');
+  const stageEl   = document.querySelector('.stage');
 
+  // Reset volatile UI
   answersEl.innerHTML = '';
+  cardsEl.innerHTML = '';
   cursorEl.classList.remove('hidden');
+
+  // Stage layout: top-aligned for choice steps, centered otherwise.
+  // Class is toggled while prompt is empty, so the position swap is invisible.
+  stageEl.classList.toggle('has-cards', step.type === 'choice');
 
   const typed = await typeText(promptEl, t(step.key), token);
   if (!typed || token.cancelled) return null;
@@ -97,29 +188,20 @@ async function runStep(step, token) {
     return { next: step.next ?? null };
   }
 
-  if (step.type === 'question') {
-    return new Promise((resolve) => {
-      step.answers.forEach((ans, i) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'answer-btn';
-        btn.style.animationDelay = `${i * 90}ms`;
-        btn.textContent = t(ans.key);
-        btn.addEventListener('click', () => {
-          if (token.cancelled) return;
-          resolve({ next: ans.next ?? null });
-        });
-        answersEl.appendChild(btn);
-      });
-    });
+  if (step.type === 'choice') {
+    // Text stays on screen, cards animate in. Step "freezes" — the
+    // flow loop sees no `next` and stops advancing on choice steps.
+    renderCards(cardsEl);
+    return { next: null };
   }
 
   return null;
 }
 
-async function runFlow(token) {
-  let i = 0;
+async function runFlow(token, fromIndex = 0) {
+  let i = fromIndex;
   while (i < flow.length && !token.cancelled) {
+    currentStepIndex = i;
     const step = flow[i];
     const result = await runStep(step, token);
     if (token.cancelled || !result) return;
@@ -128,27 +210,33 @@ async function runFlow(token) {
       const idx = flow.findIndex(s => s.id === result.next);
       if (idx === -1) break;
       i = idx;
+    } else if (step.type === 'choice') {
+      // Choice step idles — stop advancing.
+      return;
     } else {
       i++;
     }
   }
 }
 
-function startFlow() {
+function startFlow(fromIndex = 0) {
   if (activeToken) activeToken.cancelled = true;
   const token = { cancelled: false };
   activeToken = token;
 
-  // Reset UI before starting fresh
+  // Reset volatile UI before starting fresh
   document.getElementById('promptText').textContent = '';
   document.getElementById('answers').innerHTML = '';
+  document.getElementById('cards').innerHTML = '';
 
-  runFlow(token);
+  runFlow(token, fromIndex);
 }
 
 
 /* =========================================================
-   Language switch
+   Language switch — restarts from the CURRENT step (not from intro),
+   so toggling RU/EN while looking at the cards just re-renders that
+   step in the new language instead of replaying intro.
 ========================================================= */
 function applyLangUI() {
   document.documentElement.lang = currentLang;
@@ -166,7 +254,7 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
     currentLang = next;
     localStorage.setItem('lang', currentLang);
     applyLangUI();
-    startFlow();
+    startFlow(currentStepIndex);
   });
 });
 
