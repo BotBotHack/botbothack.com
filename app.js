@@ -104,14 +104,13 @@ function renderCards(container) {
     el.className = 'card';
     el.dataset.cardId = card.id;
 
-    // Title — name | tag (with colored separator and tag class).
-    // Spaces between spans are required so the browser can wrap
-    // long titles instead of overflowing the card.
+    // Title — name | tag. No spaces between spans: title should
+    // overflow and clip rather than wrap to a second line.
     const title = document.createElement('h3');
     title.className = 'card-title';
     title.innerHTML =
-      `<span class="card-title-name">${card.name}</span> ` +
-      `<span class="card-title-sep">|</span> ` +
+      `<span class="card-title-name">${card.name}</span>` +
+      `<span class="card-title-sep">|</span>` +
       `<span class="${card.tagClass}">${card.tag}</span>`;
     el.appendChild(title);
 
