@@ -34,11 +34,6 @@
 
 html { -webkit-text-size-adjust: 100%; }
 
-html, body {
-  height: 100%;
-  overflow: hidden;
-}
-
 body {
   background: var(--bg-0);
   color: var(--text);
@@ -51,6 +46,9 @@ body {
   position: relative;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Scroll happens on the document, not on a nested container.
+     Fixed bg layers stay perfectly in sync with the viewport. */
+  overscroll-behavior: none;
 }
 
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
@@ -90,6 +88,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     radial-gradient(ellipse 45% 35% at 82% 78%, rgba(255, 45, 156, 0.10), transparent 70%),
     radial-gradient(ellipse 40% 30% at 18% 80%, rgba(0, 255, 156, 0.06), transparent 70%);
   animation: glowPulse 7s ease-in-out infinite alternate;
+  will-change: transform, opacity;
 }
 
 @keyframes glowPulse {
@@ -200,8 +199,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   justify-content: center;
   align-items: center;
   padding: 2rem 1.5rem 3rem;
-  overflow-y: auto;
-  transition: justify-content 0s; /* class swap is instant on purpose */
 }
 
 /* When cards are showing, prompt sits near the top with breathing room */
@@ -382,10 +379,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   margin-bottom: 1rem;
   position: relative;
   z-index: 1;
-  /* If the title is too long for the card, wrap to the next line
-     instead of overflowing or being clipped. */
-  overflow-wrap: break-word;
-  word-break: break-word;
+  /* Never wrap: title should be clipped by .card's overflow:hidden
+     if it can't fit on one line. */
+  white-space: nowrap;
   max-width: 100%;
 }
 
@@ -397,6 +393,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 .card-title-sep {
   color: var(--neon-pink);
   text-shadow: var(--glow-pink-sm);
+  margin: 0 0.55em;
 }
 
 .card-tag-free {
@@ -547,6 +544,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     letter-spacing: 0.03em;
     margin-bottom: 0.75rem;
   }
+  .card-title-sep { margin: 0 0.4em; }
 
   .card-image {
     max-width: 100%;
