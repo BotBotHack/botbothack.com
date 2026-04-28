@@ -122,6 +122,49 @@ function renderCards(container) {
     baseImg.src = card.image;
     baseImg.alt = '';
     imgWrap.appendChild(baseImg);
+
+    // Animated fractal-noise smoke layer. Sits between the base image
+    // and the overlay (venok), so smoke is visible only on sf2.
+    // SVG is required because <feTurbulence> generates real Perlin-style
+    // noise; CSS gradients can't produce this kind of pattern.
+    // Two SMIL animations morph it without repeating: `baseFrequency`
+    // shifts the cloud scale, `seed` continuously evolves the pattern.
+    const smokeId = `smoke-${card.id}-${Math.floor(Math.random() * 1e6)}`;
+    const initialSeed = Math.floor(Math.random() * 100);
+    const smokeSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    smokeSvg.classList.add('card-image-smoke');
+    smokeSvg.setAttribute('preserveAspectRatio', 'none');
+    smokeSvg.innerHTML = `
+      <filter id="${smokeId}" x="0%" y="0%" width="100%" height="100%">
+        <feTurbulence type="turbulence" baseFrequency="0.011" numOctaves="2" seed="${initialSeed}">
+          <!-- NARROW range around the initial value so clouds stay visible
+               from the very first frame (no fade-in from giant invisible blobs).
+               baseFrequency is a continuous parameter — interpolating it
+               smoothly stretches/compresses the noise, no visual jumps. -->
+          <animate attributeName="baseFrequency"
+                   values="0.011;0.0098;0.0115;0.0102;0.011"
+                   dur="55s"
+                   repeatCount="indefinite"/>
+          <!-- NOTE: deliberately NOT animating 'seed'. seed is a categorical
+               parameter — each integer value gives a completely uncorrelated
+               noise pattern, and SMIL's float interpolation causes the pattern
+               to "teleport" every time it crosses an integer boundary, plus
+               another snap on each loop restart. The static random 'seed'
+               above is enough to make each card start with a unique pattern. -->
+        </feTurbulence>
+        <feColorMatrix values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   1 0 0 0 0"/>
+        <!-- Contrast curve: kill low alphas (transparent gaps) and amplify
+             high alphas (dense cloudy patches). Tuned so the densest spots
+             are visibly dark but never fully black — they still show some
+             of the underlying image through. -->
+        <feComponentTransfer>
+          <feFuncA type="linear" slope="1.8" intercept="-0.55"/>
+        </feComponentTransfer>
+      </filter>
+      <rect width="100%" height="100%" filter="url(#${smokeId})"/>
+    `;
+    imgWrap.appendChild(smokeSvg);
+
     if (card.overlay) {
       const overlayImg = document.createElement('img');
       overlayImg.className = 'card-image-overlay';
