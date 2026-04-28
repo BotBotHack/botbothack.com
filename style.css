@@ -441,7 +441,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   height: 120%;
   z-index: 2;
   pointer-events: none;
-  opacity: 0.75;
+  opacity: 0.85;
   animation: smokeDrift 45s ease-in-out infinite alternate;
   /* Promote to its own GPU layer so motion is smooth */
   will-change: transform;
