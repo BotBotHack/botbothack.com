@@ -1,3 +1,11 @@
+/* Wrap everything in an IIFE so all top-level `const`s are scoped
+   locally. This protects against the script being evaluated twice
+   in the same global context (a known quirk of some live-reload
+   tools, including VS Code Live Preview), which would otherwise
+   throw "Identifier 'I18N' has already been declared". */
+(() => {
+'use strict';
+
 /* =========================================================
    1) i18n — texts in both languages, auto-detected on load.
    To add new step text: add a key to BOTH `ru` and `en`.
@@ -158,7 +166,7 @@ function renderCards(container) {
              are visibly dark but never fully black — they still show some
              of the underlying image through. -->
         <feComponentTransfer>
-          <feFuncA type="linear" slope="1.8" intercept="-0.55"/>
+          <feFuncA type="linear" slope="2.2" intercept="-0.7"/>
         </feComponentTransfer>
       </filter>
       <rect width="100%" height="100%" filter="url(#${smokeId})"/>
@@ -306,3 +314,5 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
 ========================================================= */
 applyLangUI();
 startFlow();
+
+})();
