@@ -422,9 +422,45 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   border-radius: 14px;
   overflow: hidden;
   z-index: 1;
+  /* Stacking context so pseudo-element z-index can sit between children */
+  isolation: isolate;
   box-shadow:
     0 0 0 1px var(--line),
     inset 0 0 30px rgba(0, 240, 255, 0.10);
+}
+
+/* ANIMATED PERLIN-STYLE SMOKE — an SVG layer with <feTurbulence>
+   inserted by JS. Sits ABOVE sf2 (z-index 1) but BELOW venok (z-index 3),
+   so smoke is only visible on the underlying picture, never on the wreath.
+   SMIL animations inside the SVG morph the noise pattern continuously
+   while CSS transform drifts the layer in different directions. */
+.card-image-smoke {
+  position: absolute;
+  inset: -10%;
+  width: 120%;
+  height: 120%;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0.75;
+  animation: smokeDrift 45s ease-in-out infinite alternate;
+  /* Promote to its own GPU layer so motion is smooth */
+  will-change: transform;
+}
+
+@keyframes smokeDrift {
+  0%   { transform: translate(-3%, -2%) scale(1.00); }
+  50%  { transform: translate( 2%,  3%) scale(1.03); }
+  100% { transform: translate( 3%, -1%) scale(1.01); }
+}
+
+/* Static vignette — darkens edges only. Always present, doesn't move. */
+.card-image::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 40%, rgba(0, 0, 0, 0.55) 100%);
 }
 
 .card-image-base {
@@ -432,6 +468,8 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   height: 100%;
   object-fit: cover;
   display: block;
+  position: relative;
+  z-index: 1;
 }
 
 .card-image-overlay {
@@ -441,8 +479,27 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
   height: 100%;
   object-fit: contain;
   pointer-events: none;
-  filter: drop-shadow(0 0 8px rgba(255, 216, 74, 0.55))
-          drop-shadow(0 0 18px rgba(255, 216, 74, 0.30));
+  z-index: 3;  /* above the vignette */
+  filter:
+    drop-shadow(0 0 4px  rgba(255, 216, 74, 0.45))
+    drop-shadow(0 0 12px rgba(255, 216, 74, 0.25))
+    drop-shadow(0 0 22px rgba(255, 216, 74, 0.15));
+  animation: venokGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes venokGlow {
+  from {
+    filter:
+      drop-shadow(0 0 3px  rgba(255, 216, 74, 0.35))
+      drop-shadow(0 0 10px rgba(255, 216, 74, 0.20))
+      drop-shadow(0 0 18px rgba(255, 216, 74, 0.10));
+  }
+  to {
+    filter:
+      drop-shadow(0 0 5px  rgba(255, 216, 74, 0.55))
+      drop-shadow(0 0 14px rgba(255, 216, 74, 0.32))
+      drop-shadow(0 0 26px rgba(255, 216, 74, 0.20));
+  }
 }
 
 /* Features list */
