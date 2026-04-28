@@ -20,7 +20,7 @@
   <!-- Top bar: logo + language switcher -->
   <header class="topbar">
     <div class="logo">
-      <span class="logo-bracket">[</span><span class="logo-text">root@hack</span><span class="logo-bracket">]</span><span class="logo-cursor">▮</span>
+      <span class="logo-bracket">[</span><span class="logo-text">root@hack</span><span class="logo-bracket">]</span><span class="logo-cursor"></span>
     </div>
     <nav class="lang-switch" aria-label="Language">
       <button class="lang-btn" data-lang="ru" type="button">RU</button>
@@ -29,12 +29,13 @@
     </nav>
   </header>
 
-  <!-- Main stage: the prompt + answer area -->
+  <!-- Main stage: the prompt + answer area + choice cards -->
   <main class="stage">
     <div class="prompt" aria-live="polite">
-      <span class="prompt-prefix">$</span><span class="prompt-text" id="promptText"></span><span class="prompt-cursor" id="promptCursor">▮</span>
+      <span class="prompt-prefix">$</span><span class="prompt-text" id="promptText"></span><span class="prompt-cursor" id="promptCursor"></span>
     </div>
     <div class="answers" id="answers"></div>
+    <div class="cards" id="cards"></div>
   </main>
 
   <!-- Bottom status bar -->
