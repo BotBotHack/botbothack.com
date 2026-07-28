@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>PayloadContent</key>
+    <array>
+        <dict>
+            <key>DNSSettings</key>
+            <dict>
+                <key>DNSSettingsType</key>
+                <string>TLS</string>
+                <key>ServerName</key>
+                <string>dns.botbothack.com</string>
+                <key>ServerAddresses</key>
+                <array>
+                    <string>94.156.237.198</string>
+                </array>
+            </dict>
+            <key>PayloadDescription</key>
+            <string>Configures DNS over TLS for dns.botbothack.com</string>
+            <key>PayloadDisplayName</key>
+            <string>DNS over TLS - botbothack</string>
+            <key>PayloadIdentifier</key>
+            <string>com.botbothack.dnsSettings.00660d83</string>
+            <key>PayloadType</key>
+            <string>com.apple.dnsSettings.managed</string>
+            <key>PayloadUUID</key>
+            <string>00660D83-5CDE-422D-848F-AFBEBC3CC7FC</string>
+            <key>PayloadVersion</key>
+            <integer>1</integer>
+        </dict>
+    </array>
+    <key>PayloadDisplayName</key>
+    <string>DoT: dns.botbothack.com</string>
+    <key>PayloadDescription</key>
+    <string>Устанавливает DNS over TLS сервер dns.botbothack.com для всех сетей</string>
+    <key>PayloadIdentifier</key>
+    <string>com.botbothack.dot.profile.dd671fda</string>
+    <key>PayloadRemovalDisallowed</key>
+    <false/>
+    <key>PayloadType</key>
+    <string>Configuration</string>
+    <key>PayloadUUID</key>
+    <string>DD671FDA-C362-41D7-AC73-4F2D8C396DBF</string>
+    <key>PayloadVersion</key>
+    <integer>1</integer>
+</dict>
+</plist>
